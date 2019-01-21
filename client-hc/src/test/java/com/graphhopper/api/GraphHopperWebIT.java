@@ -340,4 +340,22 @@ public class GraphHopperWebIT {
         GHResponse response = gh.route(ghRequest);
         assertTrue(response.getBest().getDistance() + "m", response.getBest().getDistance() < 500);
     }
+
+    @Test
+    public void wrongTurnAngleForRoundaboutDrivingOnTheLeft() {
+        GHRequest req = new GHRequest().
+                addPoint(new GHPoint(1.249497, 103.827001)).
+                addPoint(new GHPoint(1.249152, 103.827272));
+
+        GHResponse res = gh.route(req);
+        int counter = 0;
+        for (Instruction i : res.getBest().getInstructions()) {
+            if (i instanceof RoundaboutInstruction) {
+                counter++;
+                RoundaboutInstruction ri = (RoundaboutInstruction) i;
+                assertTrue("turn_angle should be positive (clockwise):" + ri.getTurnAngle(),ri.getTurnAngle() > 0);
+            }
+        }
+        assertTrue("no roundabout in route?", counter > 0);
+    }
 }
